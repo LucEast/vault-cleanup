@@ -1,16 +1,34 @@
 import { App, TFile } from 'obsidian';
 
+function stripFrontmatter(content: string): string {
+  const match = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/);
+  if (match) {
+    return content.slice(match[0].length);
+  }
+  return content;
+}
+
+function isInTemplatesFolder(file: TFile): boolean {
+  return file.path.toLowerCase().startsWith('templates/');
+}
+
 export async function getEmptyFiles(app: App): Promise<TFile[]> {
   const result: TFile[] = [];
   const allFiles = app.vault.getFiles();
 
   for (const file of allFiles) {
+    // Skip templates folder
+    if (isInTemplatesFolder(file)) {
+      continue;
+    }
+
     if (file.extension === 'md') {
       const content = await app.vault.cachedRead(file);
-      if (content.trim().length === 0) {
+      const contentWithoutFrontmatter = stripFrontmatter(content);
+      if (contentWithoutFrontmatter.trim().length === 0) {
         result.push(file);
       }
-    } 
+    }
     else if (file.extension === 'canvas') {
       const content = await app.vault.cachedRead(file);
       try {
@@ -21,7 +39,7 @@ export async function getEmptyFiles(app: App): Promise<TFile[]> {
       } catch {
         result.push(file);
       }
-    } 
+    }
     else if (file.extension === 'base') {
       const content = await app.vault.cachedRead(file);
       const trimmed = content.trim();

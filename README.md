@@ -32,8 +32,8 @@ The **Unused Attachments** detection is inspired by [Clear Unused Images](https:
 
 ## TODO
 - [ ] we need to make sure that empty files also counts files that just contain our base template (or only tags and no content to be clear)
-this should be configureable through settings but use my defaults:
 
+this should be configureable through settings but use my defaults:
 const ALLOWED_FOLDERS = new Set([
   'attachments',
   'daily',

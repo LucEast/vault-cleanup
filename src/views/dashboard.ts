@@ -17,6 +17,7 @@ export class CleanupDashboardView extends ItemView {
   getIcon(): string { return 'trash-2'; }
 
   async onOpen() {
+    this.contentEl.addClass('vault-cleanup-dashboard');
     this.registerEvent(this.app.metadataCache.on('changed', this.debouncedRefresh));
     this.registerEvent(this.app.vault.on('delete', this.debouncedRefresh));
     this.registerEvent(this.app.vault.on('create', this.debouncedRefresh));

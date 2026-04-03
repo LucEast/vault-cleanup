@@ -10,7 +10,7 @@ import { getMissingTopicFiles } from './missingTopic';
 import { getMisfiledFiles } from './misfiled';
 
 export class QueueDetectors {
-  constructor(private app: App) {}
+  constructor(private app: App, private getAllowedFolders: () => string[]) {}
 
   async getFilesForQueue(queueType: QueueType): Promise<TFile[]> {
     switch (queueType) {
@@ -29,7 +29,7 @@ export class QueueDetectors {
       case 'missingTopic':
         return getMissingTopicFiles(this.app);
       case 'misfiled':
-        return getMisfiledFiles(this.app);
+        return getMisfiledFiles(this.app, this.getAllowedFolders());
     }
   }
 }

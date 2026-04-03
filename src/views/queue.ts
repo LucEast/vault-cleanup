@@ -11,11 +11,14 @@ export class CleanupQueueView extends ItemView {
   queue: TFile[] = [];
   currentIndex: number = 0;
   renderer: FilePreviewRenderer;
+  private keyHandler: (e: KeyboardEvent) => void;
 
   constructor(leaf: WorkspaceLeaf, plugin: VaultCleanupPlugin) {
     super(leaf);
     this.plugin = plugin;
     this.renderer = new FilePreviewRenderer(this.app);
+
+    this.keyHandler = this.handleKeydown.bind(this);
   }
 
   getViewType(): string { return VIEW_TYPE_QUEUE; }
@@ -33,7 +36,46 @@ export class CleanupQueueView extends ItemView {
 
   getState() { return { queueType: this.queueType }; }
 
-  async onOpen() { await this.loadQueue(); }
+  async onOpen() {
+    this.contentEl.addClass('vault-cleanup-queue');
+    this.contentEl.addEventListener('keydown', this.keyHandler);
+    this.contentEl.setAttribute('tabindex', '0');
+    await this.loadQueue();
+    this.contentEl.focus();
+  }
+
+  async onClose() {
+    this.contentEl.removeEventListener('keydown', this.keyHandler);
+    this.renderer.cleanup();
+    this.contentEl.empty();
+  }
+
+  handleKeydown(e: KeyboardEvent) {
+    if (!this.plugin.settings.enableQueueHotkeys) return;
+
+    const file = this.queue[this.currentIndex];
+    if (!file && e.key !== this.plugin.settings.hotkeyExit) return;
+
+    const config = QUEUE_CONFIGS[this.queueType];
+
+    if (e.key.toLowerCase() === this.plugin.settings.hotkeyEdit.toLowerCase()) {
+      e.preventDefault();
+      if (config.editAction === 'move') {
+        this.moveFile(file);
+      } else {
+        this.openFile(file);
+      }
+    } else if (e.key.toLowerCase() === this.plugin.settings.hotkeyDelete.toLowerCase()) {
+      e.preventDefault();
+      this.deleteFile(file);
+    } else if (e.key.toLowerCase() === this.plugin.settings.hotkeySkip.toLowerCase()) {
+      e.preventDefault();
+      this.next();
+    } else if (e.key === this.plugin.settings.hotkeyExit) {
+      e.preventDefault();
+      this.leaf.detach();
+    }
+  }
 
   async loadQueue() {
     this.queue = await this.plugin.detectors.getFilesForQueue(this.queueType);
@@ -41,16 +83,11 @@ export class CleanupQueueView extends ItemView {
     await this.render();
   }
 
-  async onClose() {
-    this.renderer.cleanup();
-    this.contentEl.empty();
-  }
-
   async render() {
     this.renderer.cleanup();
     const container = this.contentEl;
     container.empty();
-    container.style.cssText = 'display: flex; flex-direction: column; height: 100%; padding: 16px;';
+    container.style.cssText = 'display: flex; flex-direction: column; height: 100%; padding: 16px; outline: none;';
 
     const config = QUEUE_CONFIGS[this.queueType];
     const header = container.createEl('div', { attr: { style: 'flex-shrink: 0;' } });
@@ -99,20 +136,23 @@ export class CleanupQueueView extends ItemView {
     // Actions
     const actions = header.createEl('div', { attr: { style: 'display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;' } });
 
-    // Edit/Move button based on queue config
+    const editKey = this.plugin.settings.hotkeyEdit.toUpperCase();
+    const deleteKey = this.plugin.settings.hotkeyDelete.toUpperCase();
+    const skipKey = this.plugin.settings.hotkeySkip.toUpperCase();
+
     if (config.editAction === 'move') {
-      const moveBtn = actions.createEl('button', { text: '📁 Move (M)' });
+      const moveBtn = actions.createEl('button', { text: `📁 Move (${editKey})` });
       moveBtn.addEventListener('click', () => this.moveFile(file));
     } else {
-      const editBtn = actions.createEl('button', { text: '✏️ Edit (E)' });
+      const editBtn = actions.createEl('button', { text: `✏️ Edit (${editKey})` });
       editBtn.addEventListener('click', () => this.openFile(file));
     }
 
-    const deleteBtn = actions.createEl('button', { text: '🗑️ Delete (D)' });
+    const deleteBtn = actions.createEl('button', { text: `🗑️ Delete (${deleteKey})` });
     deleteBtn.style.color = 'var(--text-error)';
     deleteBtn.addEventListener('click', () => this.deleteFile(file));
 
-    const skipBtn = actions.createEl('button', { text: '⏭️ Skip (S)' });
+    const skipBtn = actions.createEl('button', { text: `⏭️ Skip (${skipKey})` });
     skipBtn.addEventListener('click', () => this.next());
 
     const exitBtn = actions.createEl('button', { text: '✕ Exit' });
@@ -120,11 +160,17 @@ export class CleanupQueueView extends ItemView {
     exitBtn.addEventListener('click', () => this.leaf.detach());
 
     // Keyboard hint
-    const keyHint = config.editAction === 'move' ? 'M=Move' : 'E=Edit';
-    header.createEl('small', {
-      text: `Keys: ${keyHint}, D=Delete, S=Skip, Esc=Exit`,
-      attr: { style: 'color: var(--text-faint);' }
-    });
+    if (this.plugin.settings.enableQueueHotkeys) {
+      header.createEl('small', {
+        text: `Hotkeys enabled: ${editKey}=Edit, ${deleteKey}=Delete, ${skipKey}=Skip, Esc=Exit`,
+        attr: { style: 'color: var(--text-faint);' }
+      });
+    } else {
+      header.createEl('small', {
+        text: 'Hotkeys disabled (enable in settings)',
+        attr: { style: 'color: var(--text-faint);' }
+      });
+    }
 
     // Separator
     header.createEl('hr', {
@@ -139,6 +185,9 @@ export class CleanupQueueView extends ItemView {
     });
 
     await this.renderer.render(file, preview);
+
+    // Re-focus container for keyboard events
+    this.contentEl.focus();
   }
 
   async openFile(file: TFile) {
@@ -146,11 +195,8 @@ export class CleanupQueueView extends ItemView {
   }
 
   async moveFile(file: TFile) {
-    // First, make the file active (required for the command to work)
     await this.app.workspace.openLinkText(file.path, '', false);
-
-    // Execute the built-in "Move current file to another folder" command
-    // @ts-ignore - executeCommandById is not in the type definitions but works
+    // @ts-ignore
     this.app.commands.executeCommandById('file-explorer:move-file');
   }
 

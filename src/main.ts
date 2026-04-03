@@ -16,7 +16,10 @@ export default class VaultCleanupPlugin extends Plugin {
   async onload() {
     await this.loadSettings();
 
-    this.detectors = new QueueDetectors(this.app);
+    this.detectors = new QueueDetectors(
+      this.app,
+      () => this.settings.allowedFolders
+    );
 
     // Register views
     this.registerView(VIEW_TYPE_DASHBOARD, (leaf) => new CleanupDashboardView(leaf, this));
@@ -46,50 +49,6 @@ export default class VaultCleanupPlugin extends Plugin {
         }
       });
     }
-
-    // Queue keyboard shortcuts
-    this.addCommand({
-      id: 'queue-skip',
-      name: 'Queue: Skip',
-      checkCallback: (checking) => {
-        const view = this.app.workspace.getActiveViewOfType(CleanupQueueView);
-        if (view) { if (!checking) view.next(); return true; }
-        return false;
-      }
-    });
-
-    this.addCommand({
-      id: 'queue-delete',
-      name: 'Queue: Delete',
-      checkCallback: (checking) => {
-        const view = this.app.workspace.getActiveViewOfType(CleanupQueueView);
-        if (view?.queue[view.currentIndex]) {
-          if (!checking) view.deleteFile(view.queue[view.currentIndex]);
-          return true;
-        }
-        return false;
-      }
-    });
-
-    this.addCommand({
-      id: 'queue-edit',
-      name: 'Queue: Edit / Move',
-      checkCallback: (checking) => {
-        const view = this.app.workspace.getActiveViewOfType(CleanupQueueView);
-        if (view?.queue[view.currentIndex]) {
-          if (!checking) {
-            const config = QUEUE_CONFIGS[view.queueType];
-            if (config.editAction === 'move') {
-              view.moveFile(view.queue[view.currentIndex]);
-            } else {
-              view.openFile(view.queue[view.currentIndex]);
-            }
-          }
-          return true;
-        }
-        return false;
-      }
-    });
   }
 
   async onunload() {

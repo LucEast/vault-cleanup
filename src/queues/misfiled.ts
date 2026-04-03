@@ -1,14 +1,8 @@
 import { App, TFile } from 'obsidian';
 
-// Allowed top-level folders (add more as needed)
-const ALLOWED_FOLDERS = new Set([
-  'attachments',
-  'daily',
-  'templates',
-  'archived',
-]);
+export function getMisfiledFiles(app: App, allowedFolders: string[]): TFile[] {
+  const allowedSet = new Set(allowedFolders.map(f => f.toLowerCase()));
 
-export function getMisfiledFiles(app: App): TFile[] {
   return app.vault.getMarkdownFiles().filter(file => {
     const path = file.path;
 
@@ -21,6 +15,6 @@ export function getMisfiledFiles(app: App): TFile[] {
     const topFolder = path.split('/')[0].toLowerCase();
 
     // Misfiled if not in allowed folders
-    return !ALLOWED_FOLDERS.has(topFolder);
+    return !allowedSet.has(topFolder);
   });
 }
