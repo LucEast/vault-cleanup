@@ -15,9 +15,10 @@ export interface QueueConfig {
   title: string;
   icon: string;
   description: string;
-  action: string;  // What the user should do
+  action: string;
   hasBatchDelete: boolean;
-  editAction: 'open' | 'move';
+  editLabel: string;
+  editCommand: string | null;
 }
 
 export interface QueueDetector {

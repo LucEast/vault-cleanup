@@ -15,7 +15,6 @@ export class VaultCleanupSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    // General settings (cleanup profiles) - no heading per guidelines
     for (const [id, config] of Object.entries(QUEUE_CONFIGS)) {
       new Setting(containerEl)
         .setName(`${config.icon} ${config.title}`)
@@ -29,7 +28,6 @@ export class VaultCleanupSettingTab extends PluginSettingTab {
           })
         );
 
-      // Nested setting for misfiled queue
       if (id === 'misfiled' && this.plugin.settings.enabledQueues.misfiled) {
         new Setting(containerEl)
           .setName('Allowed folders')
@@ -48,7 +46,6 @@ export class VaultCleanupSettingTab extends PluginSettingTab {
       }
     }
 
-    // Hotkeys section
     new Setting(containerEl)
       .setName('Hotkeys')
       .setHeading();
@@ -67,9 +64,9 @@ export class VaultCleanupSettingTab extends PluginSettingTab {
 
     if (this.plugin.settings.enableQueueHotkeys) {
       const hotkeySettings = [
-        { key: 'hotkeyEdit', name: 'Edit / Move', desc: 'Key to edit or move the current file' },
+        { key: 'hotkeyEdit', name: 'Edit / Move / Add Tag', desc: 'Key for the primary action' },
         { key: 'hotkeyDelete', name: 'Delete', desc: 'Key to delete the current file' },
-        { key: 'hotkeySkip', name: 'Skip', desc: 'Key to skip the current file' },
+        { key: 'hotkeyKeep', name: 'Keep', desc: 'Key to keep the file as-is and move on' },
         { key: 'hotkeyExit', name: 'Exit', desc: 'Key to exit the queue' },
       ] as const;
 
@@ -92,7 +89,7 @@ export class VaultCleanupSettingTab extends PluginSettingTab {
     const defaults: Record<string, string> = {
       hotkeyEdit: 'e',
       hotkeyDelete: 'd',
-      hotkeySkip: 's',
+      hotkeyKeep: 'k',
       hotkeyExit: 'Escape',
     };
     return defaults[key] || '';

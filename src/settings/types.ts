@@ -6,7 +6,7 @@ export interface VaultCleanupSettings {
   enableQueueHotkeys: boolean;
   hotkeyEdit: string;
   hotkeyDelete: string;
-  hotkeySkip: string;
+  hotkeyKeep: string;
   hotkeyExit: string;
 }
 
@@ -25,6 +25,6 @@ export const DEFAULT_SETTINGS: VaultCleanupSettings = {
   enableQueueHotkeys: false,
   hotkeyEdit: 'e',
   hotkeyDelete: 'd',
-  hotkeySkip: 's',
+  hotkeyKeep: 'k',
   hotkeyExit: 'Escape',
 };
