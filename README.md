@@ -31,10 +31,13 @@ A dashboard plugin for Obsidian that helps you clean up your vault by finding an
 The **Unused Attachments** detection is inspired by [Clear Unused Images](https://github.com/ozntel/oz-clear-unused-images-obsidian) by [ozntel](https://github.com/ozntel). Consider [supporting their work](https://ko-fi.com/L3L356V6Q)!
 
 ## TODO
-
-- [ ] Publish this plugin to the community plugin list
+- [ ] cleanup the code structure for easier maintenance
+i want interfaces, the queues with their individual methods split up
+the dashboard as a single part
+the whole "technical" rendering logic split from the "business" logic
 - [ ] Add settings to enable/disable individual cleanup profiles
 - [ ] For Unfiled Files queue: "Edit" should open Obsidian's built-in "Move file" dialog
+- [ ] Publish this plugin to the community plugin list once im done with it
 
 ---
 
