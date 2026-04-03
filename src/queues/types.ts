@@ -15,6 +15,7 @@ export interface QueueConfig {
   title: string;
   icon: string;
   description: string;
+  action: string;  // What the user should do
   hasBatchDelete: boolean;
   editAction: 'open' | 'move';
 }

@@ -59,9 +59,9 @@ export class CleanupQueueView extends ItemView {
 
     // Queue complete
     if (this.currentIndex >= this.queue.length) {
-      header.createEl('p', { 
-        text: '✅ Queue complete! All files processed.', 
-        attr: { style: 'color: var(--text-success);' } 
+      header.createEl('p', {
+        text: '✅ Queue complete! All files processed.',
+        attr: { style: 'color: var(--text-success);' }
       });
       const closeBtn = header.createEl('button', { text: 'Close' });
       closeBtn.addEventListener('click', () => this.leaf.detach());
@@ -78,15 +78,23 @@ export class CleanupQueueView extends ItemView {
     }).createEl('div', {
       attr: { style: `background: var(--interactive-accent); height: 100%; width: ${progressPct}%; border-radius: 4px;` }
     });
-    progressRow.createEl('small', { 
-      text: `${this.currentIndex + 1} / ${this.queue.length}`, 
-      attr: { style: 'color: var(--text-muted);' } 
+    progressRow.createEl('small', {
+      text: `${this.currentIndex + 1} / ${this.queue.length}`,
+      attr: { style: 'color: var(--text-muted);' }
     });
 
     // File info
     header.createEl('div', {
       attr: { style: 'background: var(--background-secondary); padding: 8px 12px; border-radius: 6px; margin-bottom: 12px;' }
     }).innerHTML = `<strong>${file.basename}</strong> <span style="color: var(--text-muted); font-size: 0.85em;">${file.parent?.path || '/'}</span>`;
+
+    // Action hint
+    header.createEl('div', {
+      text: `💡 ${config.action}`,
+      attr: {
+        style: 'background: var(--background-primary-alt); padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 0.9em;'
+      }
+    });
 
     // Actions
     const actions = header.createEl('div', { attr: { style: 'display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;' } });
@@ -113,20 +121,20 @@ export class CleanupQueueView extends ItemView {
 
     // Keyboard hint
     const keyHint = config.editAction === 'move' ? 'M=Move' : 'E=Edit';
-    header.createEl('small', { 
-      text: `Keys: ${keyHint}, D=Delete, S=Skip, Esc=Exit`, 
-      attr: { style: 'color: var(--text-faint);' } 
+    header.createEl('small', {
+      text: `Keys: ${keyHint}, D=Delete, S=Skip, Esc=Exit`,
+      attr: { style: 'color: var(--text-faint);' }
     });
 
     // Separator
-    header.createEl('hr', { 
-      attr: { style: 'margin: 16px 0; border: none; border-top: 1px solid var(--background-modifier-border);' } 
+    header.createEl('hr', {
+      attr: { style: 'margin: 16px 0; border: none; border-top: 1px solid var(--background-modifier-border);' }
     });
 
     // Preview
     const preview = container.createEl('div', {
-      attr: { 
-        style: 'flex: 1; overflow-y: auto; padding: 16px; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 8px;' 
+      attr: {
+        style: 'flex: 1; overflow-y: auto; padding: 16px; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 8px;'
       }
     });
 
