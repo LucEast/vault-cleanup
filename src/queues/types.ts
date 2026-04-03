@@ -10,15 +10,22 @@ export type QueueType =
   | 'missingTopic'
   | 'misfiled';
 
+export type BatchActionType = 'delete' | 'moveToRoot';
+
+export interface BatchAction {
+  label: string;
+  type: BatchActionType;
+}
+
 export interface QueueConfig {
   id: QueueType;
   title: string;
   icon: string;
   description: string;
   action: string;
-  hasBatchDelete: boolean;
   editLabel: string;
   editCommand: string | null;
+  batchAction: BatchAction | null;
 }
 
 export interface QueueDetector {
