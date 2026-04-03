@@ -1,36 +1,38 @@
-import {App, PluginSettingTab, Setting} from "obsidian";
-import MyPlugin from "./main";
-
-export interface VaultCleanupSettings {
-	mySetting: string;
-}
-
-export const DEFAULT_SETTINGS: VaultCleanupSettings = {
-	mySetting: 'default'
-}
+import { App, PluginSettingTab, Setting } from 'obsidian';
+import type VaultCleanupPlugin from './main';
+import { QUEUE_CONFIGS } from './queues';
+import { QueueType } from './types';
 
 export class VaultCleanupSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+  plugin: VaultCleanupPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
+  constructor(app: App, plugin: VaultCleanupPlugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
 
-	display(): void {
-		const {containerEl} = this;
+  display(): void {
+    const { containerEl } = this;
+    containerEl.empty();
 
-		containerEl.empty();
+    containerEl.createEl('h2', { text: 'Vault Cleanup Settings' });
+    containerEl.createEl('p', { 
+      text: 'Enable or disable individual cleanup profiles.',
+      attr: { style: 'color: var(--text-muted); margin-bottom: 1em;' }
+    });
 
-		new Setting(containerEl)
-			.setName('Settings #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-	}
+    // Create a toggle for each queue
+    for (const [id, config] of Object.entries(QUEUE_CONFIGS)) {
+      new Setting(containerEl)
+        .setName(`${config.icon} ${config.title}`)
+        .setDesc(config.description)
+        .addToggle(toggle => toggle
+          .setValue(this.plugin.settings.enabledQueues[id as QueueType])
+          .onChange(async (value) => {
+            this.plugin.settings.enabledQueues[id as QueueType] = value;
+            await this.plugin.saveSettings();
+          })
+        );
+    }
+  }
 }
