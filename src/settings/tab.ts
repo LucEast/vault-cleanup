@@ -2,6 +2,7 @@ import { App, PluginSettingTab, Setting } from 'obsidian';
 import type VaultCleanupPlugin from '../main';
 import { QueueType } from '../queues/types';
 import { QUEUE_CONFIGS } from '../queues/configs';
+import { VaultOrganization } from './types';
 
 export class VaultCleanupSettingTab extends PluginSettingTab {
   plugin: VaultCleanupPlugin;
@@ -15,7 +16,10 @@ export class VaultCleanupSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
+    // Cleanup profile toggles (excluding unfiled/misfiled)
     for (const [id, config] of Object.entries(QUEUE_CONFIGS)) {
+      if (id === 'unfiled' || id === 'misfiled') continue;
+
       new Setting(containerEl)
         .setName(`${config.icon} ${config.title}`)
         .setDesc(config.description)
@@ -27,25 +31,46 @@ export class VaultCleanupSettingTab extends PluginSettingTab {
             this.display();
           })
         );
-
-      if (id === 'misfiled' && this.plugin.settings.enabledQueues.misfiled) {
-        new Setting(containerEl)
-          .setName('Allowed folders')
-          .setDesc('Comma-separated folder names where notes are allowed')
-          .addText(text => text
-            .setPlaceholder('attachments, daily, templates, archived')
-            .setValue(this.plugin.settings.allowedFolders.join(', '))
-            .onChange(async (value) => {
-              this.plugin.settings.allowedFolders = value
-                .split(',')
-                .map(f => f.trim().toLowerCase())
-                .filter(f => f.length > 0);
-              await this.plugin.saveSettings();
-            })
-          );
-      }
     }
 
+    // Vault organization section
+    new Setting(containerEl)
+      .setName('Vault organization')
+      .setHeading();
+
+    new Setting(containerEl)
+      .setName('Organization style')
+      .setDesc('How do you organize notes in your vault?')
+      .addDropdown(dropdown => dropdown
+        .addOption('root', 'Notes in root, special folders only')
+        .addOption('folders', 'Notes organized in folders')
+        .setValue(this.plugin.settings.vaultOrganization)
+        .onChange(async (value: VaultOrganization) => {
+          this.plugin.settings.vaultOrganization = value;
+          await this.plugin.saveSettings();
+          this.display();
+        })
+      );
+
+    // Show allowed folders only for root-based organization
+    if (this.plugin.settings.vaultOrganization === 'root') {
+      new Setting(containerEl)
+        .setName('Allowed folders')
+        .setDesc('Comma-separated folder names where notes are allowed')
+        .addText(text => text
+          .setPlaceholder('attachments, daily, templates, archived')
+          .setValue(this.plugin.settings.allowedFolders.join(', '))
+          .onChange(async (value) => {
+            this.plugin.settings.allowedFolders = value
+              .split(',')
+              .map(f => f.trim().toLowerCase())
+              .filter(f => f.length > 0);
+            await this.plugin.saveSettings();
+          })
+        );
+    }
+
+    // Hotkeys section
     new Setting(containerEl)
       .setName('Hotkeys')
       .setHeading();

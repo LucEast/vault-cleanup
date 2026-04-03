@@ -45,7 +45,13 @@ export class CleanupDashboardView extends ItemView {
     for (const [id, config] of Object.entries(QUEUE_CONFIGS)) {
       if (!this.plugin.settings.enabledQueues[id as QueueType]) continue;
 
+
+      // Handle mutually exclusive unfiled/misfiled based on organization preference
+      if (id === 'unfiled' && this.plugin.settings.vaultOrganization !== 'folders') continue;
+      if (id === 'misfiled' && this.plugin.settings.vaultOrganization !== 'root') continue;
+
       const files = await this.plugin.detectors.getFilesForQueue(id as QueueType);
+
       const count = files.length;
 
       const card = grid.createEl('div', {

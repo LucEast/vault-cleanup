@@ -1,6 +1,17 @@
 
 A dashboard plugin for Obsidian that helps you clean up your vault by finding and managing problematic files.
 
+## Philosophy
+
+This plugin is opinionated towards a specific workflow:
+
+- **Root-based organization**: Notes live in the vault root, with special folders (`attachments/`, `daily/`, `templates/`, `archived/`) for specific purposes
+- **Tag-driven categorization**: Notes are categorized using `type/*` and `topic/*` tags rather than folder hierarchies
+- **Links over folders**: Relationships between notes are expressed through links, not folder structure
+
+While the defaults reflect this workflow, settings are provided for those who prefer folder-based organization or have different needs.
+
+
 ## Features
 
 - **Dashboard view** — Overview of all cleanup categories with file counts
@@ -31,19 +42,6 @@ A dashboard plugin for Obsidian that helps you clean up your vault by finding an
 The **Unused Attachments** detection is inspired by [Clear Unused Images](https://github.com/ozntel/oz-clear-unused-images-obsidian) by [ozntel](https://github.com/ozntel). Consider [supporting their work](https://ko-fi.com/L3L356V6Q)!
 
 ## TODO
-- [ ] we need to make sure that empty files also counts files that just contain our base template (or only tags and no content to be clear)
-
-this should be configureable through settings but use my defaults:
-const ALLOWED_FOLDERS = new Set([
-  'attachments',
-  'daily',
-  'templates',
-  'archived',
-]);
-
-- [ ] Add settings to enable/disable individual cleanup profiles
-- [ ] rethink the keybinds (can we make them only work while on a queue view?) because i cant bind s d or e globally
-
 - [ ] publish workflows von lucEast übernehmen .releaserc
 - [ ] For Unfiled Files queue: "Edit" should open Obsidian's built-in "Move file" dialog
 - [ ] Publish this plugin to the community plugin list once im done with it
