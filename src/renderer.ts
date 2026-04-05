@@ -45,10 +45,17 @@ export class FilePreviewRenderer extends Component {
     container.createEl('pre', { text: content });
   }
 
-  private async renderPdf(file: TFile, container: HTMLElement): Promise<void> {
-    const embed = `![[${file.path}]]`;
-    await MarkdownRenderer.render(this.app, embed, container, file.path, this);
-  }
+private renderPdf(file: TFile, container: HTMLElement): void {
+  const resourcePath = this.app.vault.getResourcePath(file);
+
+  const iframe = container.createEl('iframe', {
+    cls: 'vault-cleanup-pdf-preview',
+    attr: {
+      src: resourcePath,
+      frameborder: '0',
+    }
+  });
+}
 
   private renderImage(file: TFile, container: HTMLElement): void {
     const img = container.createEl('img');

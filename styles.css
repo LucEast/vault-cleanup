@@ -45,17 +45,17 @@
   color: var(--text-success);
 }
 
-/* Queue */
 .vault-cleanup-queue {
-  user-select: text;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .vault-cleanup-queue-container {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  padding: 16px;
-  outline: none;
+  min-height: 0;
 }
 
 .vault-cleanup-header {
@@ -125,12 +125,11 @@
 
 .vault-cleanup-preview {
   flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  background: var(--background-primary);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 8px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
+
 
 .vault-cleanup-preview-image {
   max-width: 100%;
@@ -152,4 +151,12 @@
 .vault-cleanup-btn-disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.vault-cleanup-pdf-preview {
+  flex: 1;
+  width: 100%;
+  min-height: 200px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
 }
