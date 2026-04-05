@@ -1,6 +1,6 @@
 {
 	"name": "vault-cleanup",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Dashboard for cleaning up empty, untagged, and unfiled notes",
 	"main": "main.js",
 	"type": "module",
