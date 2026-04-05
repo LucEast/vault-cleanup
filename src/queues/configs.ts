@@ -81,4 +81,14 @@ export const QUEUE_CONFIGS: Record<QueueType, QueueConfig> = {
     editCommand: null,
     batchAction: null,
   },
+  dailyTemplate: {
+    id: 'dailyTemplate',
+    title: 'Daily template mismatch',
+    icon: '📅',
+    description: 'Daily notes that don\'t match your current template structure',
+    action: 'Update this note to match your daily template',
+    editLabel: 'Edit',
+    editCommand: null,
+    batchAction: null,
+  },
 };

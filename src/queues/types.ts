@@ -8,7 +8,8 @@ export type QueueType =
   | 'orphan'
   | 'missingType'
   | 'missingTopic'
-  | 'misfiled';
+  | 'misfiled'
+  | 'dailyTemplate';
 
 export type BatchActionType = 'delete' | 'moveToRoot';
 

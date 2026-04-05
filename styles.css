@@ -160,3 +160,80 @@
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
 }
+
+/* Diff view */
+.vault-cleanup-diff-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.vault-cleanup-diff-header {
+  display: flex;
+  gap: 16px;
+  padding: 8px 12px;
+  background: var(--background-secondary);
+  border-radius: 6px;
+  font-size: 0.85em;
+}
+
+.vault-cleanup-diff-legend-removed {
+  color: var(--text-error);
+}
+
+.vault-cleanup-diff-legend-added {
+  color: var(--text-success);
+}
+
+.vault-cleanup-diff-legend-same {
+  color: var(--text-muted);
+}
+
+.vault-cleanup-diff-view {
+  font-family: var(--font-monospace);
+  font-size: 0.9em;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 12px;
+  overflow-x: auto;
+}
+
+.vault-cleanup-diff-line {
+  white-space: pre;
+  line-height: 1.5;
+}
+
+.vault-cleanup-diff-added {
+  background: rgba(0, 255, 0, 0.1);
+  color: var(--text-success);
+}
+
+.vault-cleanup-diff-removed {
+  background: rgba(255, 0, 0, 0.1);
+  color: var(--text-error);
+}
+
+.vault-cleanup-diff-same {
+  color: var(--text-muted);
+}
+
+.vault-cleanup-diff-marker {
+  opacity: 0.7;
+  user-select: none;
+}
+
+.vault-cleanup-diff-original-header {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.vault-cleanup-diff-original {
+  font-size: 0.85em;
+  background: var(--background-secondary);
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  max-height: 300px;
+  overflow-y: auto;
+}

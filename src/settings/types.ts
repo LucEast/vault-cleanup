@@ -25,6 +25,7 @@ export const DEFAULT_SETTINGS: VaultCleanupSettings = {
     missingType: true,
     missingTopic: true,
     misfiled: true,
+    dailyTemplate: true,
   },
   vaultOrganization: 'root',
   allowedFolders: ['attachments', 'daily', 'templates', 'archived'],

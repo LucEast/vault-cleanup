@@ -48,6 +48,9 @@ export class CleanupDashboardView extends ItemView {
       if (id === 'unfiled' && this.plugin.settings.vaultOrganization !== 'folders') continue;
       if (id === 'misfiled' && this.plugin.settings.vaultOrganization !== 'root') continue;
 
+      // Only show dailyTemplate queue if Daily Notes plugin is enabled
+      if (id === 'dailyTemplate' && !this.plugin.detectors.isDailyTemplateQueueAvailable()) continue;
+
       const files = await this.plugin.detectors.getFilesForQueue(id as QueueType);
       const count = files.length;
 

@@ -8,9 +8,10 @@ import { getOrphanFiles } from './orphan';
 import { getMissingTypeFiles } from './missingType';
 import { getMissingTopicFiles } from './missingTopic';
 import { getMisfiledFiles } from './misfiled';
+import { getDailyTemplateMismatchFiles, isDailyNotesPluginEnabled } from './dailyTemplate';
 
 export class QueueDetectors {
-  constructor(private app: App, private getAllowedFolders: () => string[]) {}
+  constructor(private app: App, private getAllowedFolders: () => string[]) { }
 
   async getFilesForQueue(queueType: QueueType): Promise<TFile[]> {
     switch (queueType) {
@@ -30,6 +31,12 @@ export class QueueDetectors {
         return getMissingTopicFiles(this.app);
       case 'misfiled':
         return getMisfiledFiles(this.app, this.getAllowedFolders());
+      case 'dailyTemplate':
+        return getDailyTemplateMismatchFiles(this.app);
     }
+  }
+
+  isDailyTemplateQueueAvailable(): boolean {
+    return isDailyNotesPluginEnabled();
   }
 }

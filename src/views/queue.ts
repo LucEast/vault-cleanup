@@ -4,6 +4,8 @@ import { QUEUE_CONFIGS } from '../queues/configs';
 import { VIEW_TYPE_QUEUE } from './types';
 import { QueueType } from '../queues/types';
 import { FilePreviewRenderer } from '../renderer';
+import { TemplateDiffRenderer } from '../renderer/templateDiff';
+
 
 interface QueueViewState {
   queueType?: QueueType;
@@ -17,11 +19,13 @@ export class CleanupQueueView extends ItemView {
   private currentIndex = 0;
   private history: number[] = [];
   private renderer: FilePreviewRenderer;
+  private templateDiffRenderer: TemplateDiffRenderer;
 
   constructor(leaf: WorkspaceLeaf, plugin: VaultCleanupPlugin) {
     super(leaf);
     this.plugin = plugin;
     this.renderer = new FilePreviewRenderer(this.app);
+    this.templateDiffRenderer = new TemplateDiffRenderer(this.app);
   }
 
   getViewType(): string { return VIEW_TYPE_QUEUE; }
@@ -179,8 +183,12 @@ export class CleanupQueueView extends ItemView {
 
     // Preview
     const preview = container.createEl('div', { cls: 'vault-cleanup-preview' });
-    await this.renderer.render(file, preview);
 
+    if (this.queueType === 'dailyTemplate') {
+      await this.templateDiffRenderer.render(file, preview);
+    } else {
+      await this.renderer.render(file, preview);
+    }
     // Focus for hotkeys
     this.contentEl.focus();
   }
