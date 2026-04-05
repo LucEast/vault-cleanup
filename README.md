@@ -1,5 +1,7 @@
+# Vault Cleanup
 
-A dashboard plugin for Obsidian that helps you clean up your vault by finding and managing problematic files.
+A cleanup dashboard for Obsidian that helps you organize and maintain your vault through interactive queues.
+As my vault was growing, it became difficult to enforce some organization rules for it. many of the changes i wanted can't be automated so i came up with queues to make maintenance easier.
 
 ## Philosophy
 
@@ -11,64 +13,96 @@ This plugin is opinionated towards a specific workflow:
 
 While the defaults reflect this workflow, settings are provided for those who prefer folder-based organization or have different needs.
 
+## Getting Started
 
-## Features
+### 1. Enable Queues
 
-- **Dashboard view** — Overview of all cleanup categories with file counts
-- **Queue system** — Work through files one-by-one with a Tinder-like interface
-- **Live preview** — See file contents (markdown, images, video, audio) directly in the queue
-- **Auto-refresh** — Dashboard updates automatically when files change
-- **Keyboard shortcuts** — Speed through queues with `E` (Edit), `D` (Delete), `S` (Skip)
-- **Batch delete** — "Delete All" button for empty files and unused attachments
+Go to **Settings → Vault Cleanup** and enable the cleanup profiles you want:
 
-## Cleanup Profiles
+| Queue | Description |
+|-------|-------------|
+| 📄 Empty files | Notes, canvas, and base files with no content |
+| 🏷️ Missing type tag | Notes without a `type/*` tag |
+| 📚 Missing topic tag | Notes without a `topic/*` tag |
+| 🚫 Untagged files | Notes without any tags at all |
+| 📂 Misfiled notes | Notes in non-standard folders (root-based org) |
+| 📁 Unfiled files | Notes in the vault root (folder-based org) |
+| 🖼️ Unused attachments | Images, videos, audio not linked anywhere |
+| 🔗 Orphan notes | Notes with no links in or out |
 
-|Profile|Description|
-|---|---|
-|📄 **Empty Files**|Notes, canvas, and base files with no content|
-|🏷️ **Untagged Files**|Markdown notes without any tags|
-|📁 **Unfiled Files**|Notes sitting in the vault root (no folder)|
-|🖼️ **Unused Attachments**|Images, videos, audio, and Excalidraw files not linked anywhere|
+### 2. Configure Organization Style
 
-## Usage
+Choose how you organize your vault:
 
-1. Click the 🗑️ icon in the ribbon, or use command palette: `Open Cleanup Dashboard`
-2. See an overview of files needing attention in each category
-3. Click **Start Queue** to work through files one-by-one
-4. Use **Delete All** for batch operations (empty files & unused attachments)
+- **Notes in root, special folders only** — Shows "Misfiled notes" queue, configure allowed folders
+- **Notes organized in folders** — Shows "Unfiled files" queue
 
-## Credits
+### 3. Open the Dashboard
 
-The **Unused Attachments** detection is inspired by [Clear Unused Images](https://github.com/ozntel/oz-clear-unused-images-obsidian) by [ozntel](https://github.com/ozntel). Consider [supporting their work](https://ko-fi.com/L3L356V6Q)!
+Click the 🗑️ icon in the ribbon or use the command palette: **Open cleanup dashboard**
 
-## TODO
+The dashboard shows all enabled queues with file counts. Click **Start queue** to begin processing.
 
----
+### 4. Work Through a Queue
 
-## Releasing New Releases
+![Queue workflow demo](docs/queue-demo.gif)
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+Each queue presents files one at a time with a preview. For each file you can:
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.  
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+| Action | Description |
+|--------|-------------|
+| **Edit / Add tag / Move** | Take the appropriate action for this queue type |
+| **Delete** | Move the file to trash |
+| **Keep** | Skip this file (it's fine as-is) |
+| **Back** | Return to the previous file |
+| **Exit** | Close the queue |
 
-## Adding Your Plugin to the Community Plugin List
+### 5. Optional: Enable Hotkeys
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+For faster processing, enable keyboard shortcuts in settings:
 
-## Manual Installation
+| Key | Action |
+|-----|--------|
+| `E` | Edit / Add tag / Move |
+| `D` | Delete |
+| `K` | Keep |
+| `B` | Back |
+| `Esc` | Exit queue |
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/vault-cleanup/`.
+Hotkeys only work when the queue view is focused.
 
-## Development
+## Settings
 
-- Clone this repo into your vault's `.obsidian/plugins/` folder
-- `npm install` to install dependencies
-- `npm run dev` to start compilation in watch mode
+| Setting | Description |
+|---------|-------------|
+| **Organization style** | Choose root-based or folder-based organization |
+| **Allowed folders** | Folders where notes are allowed (root-based only) |
+| **Auto-advance after edit** | Automatically move to next file after edit action |
+| **Enable keyboard shortcuts** | Enable hotkeys in queue view |
+
+## Batch Actions
+
+Some queues support batch operations from the dashboard:
+
+- **Empty files** — Delete all
+- **Unused attachments** — Delete all
+- **Misfiled notes** — Move all to root
+
+## Installation
+
+### From Community Plugins
+
+1. Open **Settings → Community plugins**
+2. Click **Browse** and search for "Vault Cleanup"
+3. Click **Install**, then **Enable**
+
+### Manual Installation
+
+1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/CodeAvolition/vault-cleanup/releases)
+2. Create folder: `.obsidian/plugins/vault-cleanup/`
+3. Copy the files into that folder
+4. Enable in **Settings → Community plugins**
+
+
+## Feature Plans / TODO
+- [ ] implement a queue to make sure all my daily files fit the same template (i changed templates in the past and i want an easy way to make sure they all still follow the current template)

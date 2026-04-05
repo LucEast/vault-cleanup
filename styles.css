@@ -148,3 +148,8 @@
   justify-content: flex-end;
   margin-top: 16px;
 }
+
+.vault-cleanup-btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -7,9 +7,11 @@ export interface VaultCleanupSettings {
   vaultOrganization: VaultOrganization;
   allowedFolders: string[];
   enableQueueHotkeys: boolean;
+  autoAdvanceOnEdit: boolean;
   hotkeyEdit: string;
   hotkeyDelete: string;
   hotkeyKeep: string;
+  hotkeyBack: string;
   hotkeyExit: string;
 }
 
@@ -27,8 +29,10 @@ export const DEFAULT_SETTINGS: VaultCleanupSettings = {
   vaultOrganization: 'root',
   allowedFolders: ['attachments', 'daily', 'templates', 'archived'],
   enableQueueHotkeys: false,
+  autoAdvanceOnEdit: true,
   hotkeyEdit: 'e',
   hotkeyDelete: 'd',
   hotkeyKeep: 'k',
+  hotkeyBack: 'b',
   hotkeyExit: 'Escape',
 };

@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, TFile, Notice, ViewStateResult } from 'obsidian';
+import { ItemView, WorkspaceLeaf, TFile, Notice } from 'obsidian';
 import type VaultCleanupPlugin from '../main';
 import { QUEUE_CONFIGS } from '../queues/configs';
 import { VIEW_TYPE_QUEUE } from './types';
@@ -15,6 +15,7 @@ export class CleanupQueueView extends ItemView {
   private queueType: QueueType | null = null;
   private files: TFile[] = [];
   private currentIndex = 0;
+  private history: number[] = [];
   private renderer: FilePreviewRenderer;
 
   constructor(leaf: WorkspaceLeaf, plugin: VaultCleanupPlugin) {
@@ -27,11 +28,12 @@ export class CleanupQueueView extends ItemView {
   getDisplayText(): string { return 'Cleanup queue'; }
   getIcon(): string { return 'list-checks'; }
 
-  async setState(state: QueueViewState, result: ViewStateResult): Promise<void> {
+  async setState(state: QueueViewState, result: Record<string, unknown>): Promise<void> {
     if (state.queueType) {
       this.queueType = state.queueType;
       this.files = await this.plugin.detectors.getFilesForQueue(this.queueType);
       this.currentIndex = 0;
+      this.history = [];
     }
     await super.setState(state, result);
     void this.render();
@@ -41,11 +43,20 @@ export class CleanupQueueView extends ItemView {
     return { queueType: this.queueType ?? undefined };
   }
 
-
   async onOpen(): Promise<void> {
     this.contentEl.addClass('vault-cleanup-queue');
     this.contentEl.setAttribute('tabindex', '0');
     this.registerDomEvent(this.contentEl, 'keydown', (e) => { this.handleKeydown(e); });
+
+    // Re-focus when view becomes active
+    this.registerEvent(
+      this.app.workspace.on('active-leaf-change', (leaf) => {
+        if (leaf?.view === this) {
+          this.contentEl.focus();
+        }
+      })
+    );
+
     await this.render();
   }
 
@@ -58,25 +69,25 @@ export class CleanupQueueView extends ItemView {
     if (!this.plugin.settings.enableQueueHotkeys) return;
 
     const file = this.files[this.currentIndex];
-    if (!file) return;
+    const { hotkeyEdit, hotkeyDelete, hotkeyKeep, hotkeyBack, hotkeyExit } = this.plugin.settings;
 
-    const { hotkeyEdit, hotkeyDelete, hotkeyKeep, hotkeyExit } = this.plugin.settings;
-
-    if (e.key === hotkeyEdit) {
+    if (e.key === hotkeyEdit && file) {
       e.preventDefault();
       void this.editFile(file);
-    } else if (e.key === hotkeyDelete) {
+    } else if (e.key === hotkeyDelete && file) {
       e.preventDefault();
       void this.deleteFile(file);
-    } else if (e.key === hotkeyKeep) {
+    } else if (e.key === hotkeyKeep && file) {
       e.preventDefault();
       this.keepFile();
+    } else if (e.key === hotkeyBack) {
+      e.preventDefault();
+      this.goBack();
     } else if (e.key === hotkeyExit) {
       e.preventDefault();
       this.exitQueue();
     }
   }
-
 
   async render(): Promise<void> {
     const container = this.contentEl;
@@ -91,7 +102,6 @@ export class CleanupQueueView extends ItemView {
     const config = QUEUE_CONFIGS[this.queueType];
     const file = this.files[this.currentIndex];
 
-    // Guard against undefined file
     if (!file) {
       container.createEl('p', { text: 'Queue complete! 🎉' });
       return;
@@ -132,26 +142,45 @@ export class CleanupQueueView extends ItemView {
 
     // Action buttons
     const actions = header.createEl('div', { cls: 'vault-cleanup-actions' });
+    const hotkeysEnabled = this.plugin.settings.enableQueueHotkeys;
 
-    const editBtn = actions.createEl('button', { text: config.editLabel });
+    // Edit button
+    const editKey = hotkeysEnabled ? ` (${this.plugin.settings.hotkeyEdit.toUpperCase()})` : '';
+    const editBtn = actions.createEl('button', { text: `${config.editLabel}${editKey}` });
     editBtn.addEventListener('click', () => { void this.editFile(file); });
 
-    const deleteBtn = actions.createEl('button', { text: 'Delete' });
+    // Delete button
+    const deleteKey = hotkeysEnabled ? ` (${this.plugin.settings.hotkeyDelete.toUpperCase()})` : '';
+    const deleteBtn = actions.createEl('button', { text: `Delete${deleteKey}` });
     deleteBtn.addClass('vault-cleanup-btn-delete');
     deleteBtn.addEventListener('click', () => { void this.deleteFile(file); });
 
-    const keepKey = this.plugin.settings.enableQueueHotkeys ? this.plugin.settings.hotkeyKeep : '';
-    const keepLabel = keepKey ? `Keep (${keepKey})` : 'Keep';
-    const keepBtn = actions.createEl('button', { text: `⏭️ ${keepLabel}` });
+    // Keep button
+    const keepKey = hotkeysEnabled ? ` (${this.plugin.settings.hotkeyKeep.toUpperCase()})` : '';
+    const keepBtn = actions.createEl('button', { text: `Keep${keepKey}` });
     keepBtn.addEventListener('click', () => { this.keepFile(); });
 
-    const exitBtn = actions.createEl('button', { text: 'Exit' });
+    // Back button
+    const backKey = hotkeysEnabled ? ` (${this.plugin.settings.hotkeyBack.toUpperCase()})` : '';
+    const backBtn = actions.createEl('button', { text: `← Back${backKey}` });
+    backBtn.addEventListener('click', () => { this.goBack(); });
+    if (this.history.length === 0) {
+      backBtn.disabled = true;
+      backBtn.addClass('vault-cleanup-btn-disabled');
+    }
+
+    // Exit button
+    const exitKey = hotkeysEnabled ? ' (Esc)' : '';
+    const exitBtn = actions.createEl('button', { text: `Exit${exitKey}` });
     exitBtn.addClass('vault-cleanup-btn-exit');
     exitBtn.addEventListener('click', () => { this.exitQueue(); });
 
     // Preview
     const preview = container.createEl('div', { cls: 'vault-cleanup-preview' });
     await this.renderer.render(file, preview);
+
+    // Focus for hotkeys
+    this.contentEl.focus();
   }
 
   private async editFile(file: TFile): Promise<void> {
@@ -165,8 +194,10 @@ export class CleanupQueueView extends ItemView {
       this.app.commands.executeCommandById(config.editCommand);
     }
 
-    // Auto-advance to next file
-    this.advanceQueue();
+    // Auto-advance if enabled
+    if (this.plugin.settings.autoAdvanceOnEdit) {
+      this.advanceQueue();
+    }
   }
 
   private async deleteFile(file: TFile): Promise<void> {
@@ -184,12 +215,23 @@ export class CleanupQueueView extends ItemView {
   }
 
   private advanceQueue(): void {
+    this.history.push(this.currentIndex);
     this.currentIndex++;
     if (this.currentIndex >= this.files.length) {
       this.currentIndex = 0;
       this.files = [];
+      this.history = [];
     }
     void this.render();
+  }
+
+  private goBack(): void {
+    if (this.history.length === 0) return;
+    const previousIndex = this.history.pop();
+    if (previousIndex !== undefined) {
+      this.currentIndex = previousIndex;
+      void this.render();
+    }
   }
 
   private exitQueue(): void {

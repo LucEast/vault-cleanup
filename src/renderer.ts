@@ -17,6 +17,8 @@ export class FilePreviewRenderer extends Component {
       await this.renderCanvas(file, container);
     } else if (file.extension === 'base') {
       await this.renderBase(file, container);
+    } else if (file.extension === 'pdf') {
+      await this.renderPdf(file, container);
     } else if (this.isImage(file)) {
       this.renderImage(file, container);
     } else if (this.isAudio(file)) {
@@ -41,6 +43,11 @@ export class FilePreviewRenderer extends Component {
   private async renderBase(file: TFile, container: HTMLElement): Promise<void> {
     const content = await this.app.vault.cachedRead(file);
     container.createEl('pre', { text: content });
+  }
+
+  private async renderPdf(file: TFile, container: HTMLElement): Promise<void> {
+    const embed = `![[${file.path}]]`;
+    await MarkdownRenderer.render(this.app, embed, container, file.path, this);
   }
 
   private renderImage(file: TFile, container: HTMLElement): void {

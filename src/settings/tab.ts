@@ -70,9 +70,25 @@ export class VaultCleanupSettingTab extends PluginSettingTab {
         );
     }
 
+    // Queue behavior section
+    new Setting(containerEl)
+      .setName('Queue behavior')
+      .setHeading();
+
+    new Setting(containerEl)
+      .setName('Auto-advance after edit')
+      .setDesc('Automatically move to the next file after using the edit action')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.autoAdvanceOnEdit)
+        .onChange(async (value) => {
+          this.plugin.settings.autoAdvanceOnEdit = value;
+          await this.plugin.saveSettings();
+        })
+      );
+
     // Hotkeys section
     new Setting(containerEl)
-      .setName('Keyboard shortcuts')
+      .setName('Hotkeys')
       .setHeading();
 
     new Setting(containerEl)
@@ -92,6 +108,7 @@ export class VaultCleanupSettingTab extends PluginSettingTab {
         { key: 'hotkeyEdit', name: 'Edit / Move / Add tag', desc: 'Key for the primary action' },
         { key: 'hotkeyDelete', name: 'Delete', desc: 'Key to delete the current file' },
         { key: 'hotkeyKeep', name: 'Keep', desc: 'Key to keep the file as-is and move on' },
+        { key: 'hotkeyBack', name: 'Back', desc: 'Key to go back to the previous file' },
         { key: 'hotkeyExit', name: 'Exit', desc: 'Key to exit the queue' },
       ] as const;
 
@@ -115,6 +132,7 @@ export class VaultCleanupSettingTab extends PluginSettingTab {
       hotkeyEdit: 'e',
       hotkeyDelete: 'd',
       hotkeyKeep: 'k',
+      hotkeyBack: 'b',
       hotkeyExit: 'Escape',
     };
     return defaults[key] || '';
