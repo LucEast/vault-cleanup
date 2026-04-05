@@ -5,5 +5,11 @@ declare module 'obsidian' {
     commands: {
       executeCommandById(id: string): boolean;
     };
+    internalPlugins: {
+      getPluginById(id: string): {
+        enabled: boolean;
+        options?: Record<string, unknown>;
+      } | null;
+    };
   }
 }

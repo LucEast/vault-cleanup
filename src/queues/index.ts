@@ -9,31 +9,53 @@ import { getMissingTypeFiles } from './missingType';
 import { getMissingTopicFiles } from './missingTopic';
 import { getMisfiledFiles } from './misfiled';
 import { getDailyTemplateMismatchFiles, isDailyNotesPluginEnabled } from './dailyTemplate';
+import { getExcludedFolders, isInExcludedFolder } from '../utils/excludedFolders';
 
 export class QueueDetectors {
   constructor(private app: App, private getAllowedFolders: () => string[]) { }
 
+  private filterExcluded(files: TFile[]): TFile[] {
+    const excludedFolders = getExcludedFolders(this.app);
+    return files.filter(file => !isInExcludedFolder(file, excludedFolders));
+  }
+
   async getFilesForQueue(queueType: QueueType): Promise<TFile[]> {
+    let files: TFile[];
+
     switch (queueType) {
       case 'empty':
-        return getEmptyFiles(this.app);
+        files = await getEmptyFiles(this.app);
+        break;
       case 'untagged':
-        return getUntaggedFiles(this.app);
+        files = await getUntaggedFiles(this.app);
+        break;
       case 'unfiled':
-        return getUnfiledFiles(this.app);
+        files = await getUnfiledFiles(this.app);
+        break;
       case 'unused':
-        return getUnusedAttachments(this.app);
+        files = await getUnusedAttachments(this.app);
+        break;
       case 'orphan':
-        return getOrphanFiles(this.app);
+        files = await getOrphanFiles(this.app);
+        break;
       case 'missingType':
-        return getMissingTypeFiles(this.app);
+        files = await getMissingTypeFiles(this.app);
+        break;
       case 'missingTopic':
-        return getMissingTopicFiles(this.app);
+        files = await getMissingTopicFiles(this.app);
+        break;
       case 'misfiled':
-        return getMisfiledFiles(this.app, this.getAllowedFolders());
+        files = await getMisfiledFiles(this.app, this.getAllowedFolders());
+        break;
       case 'dailyTemplate':
-        return getDailyTemplateMismatchFiles(this.app);
+        files = await getDailyTemplateMismatchFiles(this.app);
+        break;
+      default:
+        files = [];
     }
+
+    // Filter out files in excluded folders (templates, etc.)
+    return this.filterExcluded(files);
   }
 
   isDailyTemplateQueueAvailable(): boolean {
